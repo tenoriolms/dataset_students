@@ -1,12 +1,4 @@
-# 🧠 Exploring Media Addiction in Students with EDO
-
-This repository contains a data-driven exploratory analysis notebook investigating social media addiction among students. The objectve is to understand and simulate how media addiction evolves over time in a student population
-
-### The full 📈 **Exploratory Data Analysis** code is available in [Exploring Media Addiction in Students with EDO](https://github.com/tenoriolms/dataset_students/blob/main/Exploring%20Media%20Addiction%20in%20Students%20with%20EDO.ipynb)
-
-### More information about the dataset can be found on Kaggle [Students' Social Media Addiction](https://www.kaggle.com/datasets/adilshamim8/social-media-addiction-vs-relationships)
-
-## Overview
+# Overview
 
 In the digital age, social media addiction has emerged as a significant concern, with potential impacts on interpersonal relationships.
 
@@ -25,8 +17,58 @@ Beyond quantitative insights, this study may offer valuable perspectives for psy
 2. Test hypotheses regarding the impact of social media addiction on relationship dynamics  
 3. Identify potentially at-risk groups
 
+# Import modules
 
-## Import dataset
+
+```python
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+import scipy as sp
+import seaborn as sns
+import kagglehub
+import os
+import missingno as msno
+import kuka
+
+from sklearn.preprocessing import StandardScaler, OrdinalEncoder
+from sklearn.compose import ColumnTransformer
+from sklearn.pipeline import Pipeline
+
+from scipy.cluster.hierarchy import dendrogram, linkage
+from scipy.spatial.distance import squareform
+```
+
+# Import dataset
+
+
+```python
+#from PC
+kaggle_dataset_path = kagglehub.dataset_download('adilshamim8/social-media-addiction-vs-relationships')
+
+print(f'Directory content:')
+for i in range(len(os.listdir(kaggle_dataset_path))):
+    print(i,'-->',os.listdir(kaggle_dataset_path)[i])
+```
+
+    Directory content:
+    0 --> Students Social Media Addiction.csv
+    
+
+
+```python
+#Read dataset:
+dir_number = 0
+data_original = pd.read_csv( os.path.join(kaggle_dataset_path, os.listdir(kaggle_dataset_path)[dir_number]), engine= 'python')
+```
+
+
+```python
+data_original
+```
+
+
+
 
 <div>
 <style scoped>
@@ -243,14 +285,49 @@ Beyond quantitative insights, this study may offer valuable perspectives for psy
 <p>705 rows × 13 columns</p>
 </div>
 
+
+
+
+```python
+data_original.info()
+```
+
+    <class 'pandas.core.frame.DataFrame'>
+    RangeIndex: 705 entries, 0 to 704
+    Data columns (total 13 columns):
+     #   Column                        Non-Null Count  Dtype  
+    ---  ------                        --------------  -----  
+     0   Student_ID                    705 non-null    int64  
+     1   Age                           705 non-null    int64  
+     2   Gender                        705 non-null    object 
+     3   Academic_Level                705 non-null    object 
+     4   Country                       705 non-null    object 
+     5   Avg_Daily_Usage_Hours         705 non-null    float64
+     6   Most_Used_Platform            705 non-null    object 
+     7   Affects_Academic_Performance  705 non-null    object 
+     8   Sleep_Hours_Per_Night         705 non-null    float64
+     9   Mental_Health_Score           705 non-null    int64  
+     10  Relationship_Status           705 non-null    object 
+     11  Conflicts_Over_Social_Media   705 non-null    int64  
+     12  Addicted_Score                705 non-null    int64  
+    dtypes: float64(2), int64(5), object(6)
+    memory usage: 71.7+ KB
+    
+
 There are 705 students in the dataset.
 
 Except for the ID column, the dataset includes 6 numerical features and 6 categorical features.  
 The dataset contains no missing values.
 
-## EDA - Exploratory Data Analysis
+# EDA - Exploratory Data Analysis
 
-### Plot the distributions
+## Plot the distributions
+
+
+```python
+kuka.eda.plot_columns_dist(data_original, ncols=4, plotsize=(3.2,2));
+```
+
 
     
 ![png](Exploring%20Media%20Addiction%20in%20Students%20with%20EDA_files/Exploring%20Media%20Addiction%20in%20Students%20with%20EDA_12_0.png)
@@ -286,14 +363,49 @@ Let's now investigate the relationships between these variables.
 **First, the numerical variables:**
 
 
-### Spearman correlation
+## Spearman correlation
+
+
+```python
+corr = data_original.corr(numeric_only=True, method='spearman',)
+
+
+fig, ax = kuka.eda.plot_plairplot(data_original)
+
+offset_inset_ax = 0.5
+inset_ax = fig.add_axes([1.35, (1-offset_inset_ax)/2, offset_inset_ax+0.1, offset_inset_ax])  # [left, bottom, width, height] em coordenadas da figura
+sns.heatmap(corr, annot=True, cmap='coolwarm', fmt='.2f', ax=inset_ax, square=True)
+inset_ax.set_title('Spearman correlation')
+```
+
+    
+        String type columns:
+    
+    Gender       object
+    Academic_Level       object
+    Country       object
+    Most_Used_Platform       object
+    Affects_Academic_Performance       object
+    Relationship_Status       object
+    columns =  ['Student_ID', 'Age', 'Avg_Daily_Usage_Hours', 'Sleep_Hours_Per_Night', 'Mental_Health_Score', 'Conflicts_Over_Social_Media', 'Addicted_Score']
+    
+    
+    
+
+
+
+
+    Text(0.5, 1.0, 'Spearman correlation')
+
+
+
 
     
 ![png](Exploring%20Media%20Addiction%20in%20Students%20with%20EDA_files/Exploring%20Media%20Addiction%20in%20Students%20with%20EDA_15_2.png)
     
 
 
-The Spearman coefficient indicates the monotonic correlation between two variables.
+The Pearson coefficient indicates the linear correlation between two variables.
 
 In machine learning applications, highly correlated variables can sometimes interfere with each other and negatively impact model predictions.
 
@@ -314,6 +426,47 @@ In machine learning applications, highly correlated variables can sometimes inte
 Let's analyze the Spearman correlation coefficient for the categorical variables.
 
 
+```python
+cat_cols = ['Gender', 'Academic_Level', 'Country',
+            'Most_Used_Platform', 'Affects_Academic_Performance',
+            'Relationship_Status']
+num_cols = list(set(data_original.columns) - set(cat_cols))
+
+cat_pipeline = Pipeline(steps=[
+    ('encoder', OrdinalEncoder()),
+    ('scaler', StandardScaler())
+])
+spearman_pipeline = Pipeline(steps=[
+    ('preprocessor', 
+        ColumnTransformer(transformers=[
+                                ('cat', cat_pipeline, cat_cols),
+                                ('num', StandardScaler(), num_cols)
+                                ])
+        )
+])
+
+transformed_data = spearman_pipeline.fit_transform(data_original)
+transformed_data = pd.DataFrame( transformed_data, columns=cat_cols+num_cols )
+
+corr = transformed_data.corr( method='spearman')
+plt.figure(figsize=(10,10))
+ax = sns.heatmap(corr, annot=True, cmap='coolwarm', fmt='.2f',square=True)
+ax.set_title('Spearman correlation')
+plt.axhline(y=6, color='black', linestyle='--', linewidth=2)
+plt.axvline(x=6, color='black', linestyle='--', linewidth=2)
+plt.fill([6, 13, 13, 6], [6, 6, 13, 13], 
+         color='grey', alpha=0.7, edgecolor='black')
+```
+
+
+
+
+    [<matplotlib.patches.Polygon at 0x1e1eb5d9950>]
+
+
+
+
+    
 ![png](Exploring%20Media%20Addiction%20in%20Students%20with%20EDA_files/Exploring%20Media%20Addiction%20in%20Students%20with%20EDA_18_1.png)
     
 
@@ -329,6 +482,21 @@ Although Age does not have correlation with any numerical variable, it shows mod
 Furthermore, Academic Performance is highly correlated with "Conflicts_Over_Social_Media", "Addicted_Score", and "Mental_Health_Score". There is a moderate correlation with "Sleep_Hours_Per_Night" and "Avg_Daily_Usage_Hours".
 
 Let's focus only on the correlations involving the Addicted Score:
+
+
+```python
+plt.figure(figsize=(10, 0.7))
+sns.heatmap(corr[['Addicted_Score']].T, annot=True, cmap='coolwarm', fmt='.2f')
+```
+
+
+
+
+    <Axes: >
+
+
+
+
     
 ![png](Exploring%20Media%20Addiction%20in%20Students%20with%20EDA_files/Exploring%20Media%20Addiction%20in%20Students%20with%20EDA_21_1.png)
     
@@ -344,9 +512,32 @@ These will be the most important variables to predict the addiction level. Most 
 
 First, we need to finish the ODE.
 
-### Check outliers
+## Check outliers
 
 Checking numeric attributes:
+
+
+```python
+num_cols
+
+fig, ax = plt.subplots(nrows=len(num_cols), figsize=(5,1*len(num_cols)))
+
+
+for i, col in enumerate(num_cols):
+    ax[i].boxplot(data_original[col], orientation='horizontal', widths=0.7)
+    ax[i].set_yticklabels([col])
+    # ax[i].set_ylabel(col, rotation=0, )
+    for spine in ['top', 'right', 'left']:
+        ax[i].spines[spine].set_visible(False)
+    ax[i].tick_params(left=False, color='grey')
+    ax[i].tick_params(axis='x', labelcolor='grey')
+    ax[i].spines['bottom'].set_bounds(min(data_original[col]), max(data_original[col]))
+    ax[i].spines['bottom'].set_color('grey')
+
+
+plt.tight_layout()
+```
+
 
     
 ![png](Exploring%20Media%20Addiction%20in%20Students%20with%20EDA_files/Exploring%20Media%20Addiction%20in%20Students%20with%20EDA_25_0.png)
@@ -357,21 +548,53 @@ There are just a few outliers in the "Average Daily Use" attribute. Otherwise, n
 
 Now, let's check the categorical attributes with a small number of categories:
 
-### Relationships Among Categorical Variables
+## Relationships Among Categorical Variables
 
+
+```python
+sns.set_style("ticks")
+num_cols_boxplot = num_cols.copy()
+num_cols_boxplot.remove('Student_ID')
+def plot(cat):
+    fig, ax = plt.subplots(ncols=len(num_cols_boxplot), figsize=(16, 1.*len(data_original[cat].unique())), sharey=True )
+
+    for j, num in enumerate(num_cols_boxplot):
+        sns.boxplot(data=data_original, x=num, y=cat, ax=ax[j]);
+    fig.suptitle(cat)
+    fig.tight_layout()
+
+    plt.figure(figsize=(5, 0.7))
+    sns.heatmap(corr[[cat]].T[num_cols_boxplot], annot=True, cmap='coolwarm', fmt='.2f', vmax=1, vmin=-1)
+import warnings
+warnings.filterwarnings('ignore', category=FutureWarning)
+```
+
+```
+cat_cols = ['Gender','Academic_Level','Country','Most_Used_Platform','Affects_Academic_Performance','Relationship_Status']
+```
 
 Now it is better to examine the correlations between the categorical variables.
 
 Let's plot the **box plots** to understand the relationships and use the **Spearman coefficient** to quantify their strength.
 
-#### Gender
+### Gender
+
+
+```python
+plot('Gender')
+```
+
+
     
 ![png](Exploring%20Media%20Addiction%20in%20Students%20with%20EDA_files/Exploring%20Media%20Addiction%20in%20Students%20with%20EDA_32_0.png)
     
 
+
+
     
 ![png](Exploring%20Media%20Addiction%20in%20Students%20with%20EDA_files/Exploring%20Media%20Addiction%20in%20Students%20with%20EDA_32_1.png)
     
+
 
 Remember that there is a good representation of gender. Therefore, the size of each group will not interfere with the analysis.
 
@@ -385,18 +608,42 @@ Remember that there is a good representation of gender. Therefore, the size of e
 
 ***Female users tend to be a vulnerable group to social media addiction. However, this is likely influenced by age, given that younger users tend to be female:***
 
+
+```python
+fig, ax = plt.subplots(figsize=(4,4))
+
+sns.kdeplot(data=data_original, x='Age', y='Addicted_Score', hue='Gender', ax=ax, level=5, fill=True, alpha=0.4, pallete="husl")
+sns.scatterplot(data=data_original, x='Age', y='Addicted_Score', hue='Gender', alpha=0.3, ax=ax)
+
+ax.legend().remove()
+fig.legend(loc='lower center', bbox_to_anchor=(0.5,-0.1), ncols=2)
+fig.tight_layout()
+```
+
+    c:\Users\Lhucas Tenorio\AppData\Local\Programs\Python\Python311\Lib\site-packages\seaborn\distributions.py:1176: UserWarning: The following kwargs were not used by contour: 'level', 'pallete'
+      cset = contour_func(
+    
+
+
     
 ![png](Exploring%20Media%20Addiction%20in%20Students%20with%20EDA_files/Exploring%20Media%20Addiction%20in%20Students%20with%20EDA_34_1.png)
     
 
+
 **In other words, any variable influenced by "Gender" will also be partially correlated with Age.**
 
-#### Academic Level
+### Academic Level
+
+
+```python
+plot('Academic_Level')
+```
 
 
     
 ![png](Exploring%20Media%20Addiction%20in%20Students%20with%20EDA_files/Exploring%20Media%20Addiction%20in%20Students%20with%20EDA_37_0.png)
     
+
 
 
     
@@ -414,7 +661,12 @@ Furthermore, there are still small correlations: undergraduate students tend to 
 
 ***→ Due to the high correlation with Age, all of this reveals once again that younger students are more susceptible to social media addiction and its side effects (more conflicts and poorer mental health).***
 
-#### Academic Performance
+### Academic Performance
+
+
+```python
+plot('Affects_Academic_Performance')
+```
 
 
     
@@ -442,7 +694,12 @@ Academic Performance can indicate many things to us. Students whose academic per
 
 There is no strong correlation between Academic Performance and Age. However, a slight tendency can be observed for younger students to have their academic performance affected.
 
-#### Relationship Status
+### Relationship Status
+
+
+```python
+plot('Relationship_Status')
+```
 
 
     
@@ -460,7 +717,35 @@ There is no correlation between Relationship Status and any other variable.
 
 There is a slight tendency for younger students to have a "complicated" relationship status, be more addicted to social media, and feel its side effects.
 
-#### Most Used Platform
+### Most Used Platform
+
+
+```python
+# Let's focus in the top 6 Social medias
+data_Most_Used_Platform = data_original.copy()
+Most_Used_Platform_vc = data_Most_Used_Platform['Most_Used_Platform'].value_counts()
+Most_Used_Platform_lastPlat = dict(zip(Most_Used_Platform_vc.keys()[6:-1], ['Others']*(len(Most_Used_Platform_vc.keys())-6)))
+data_Most_Used_Platform['Most_Used_Platform'] = data_Most_Used_Platform['Most_Used_Platform'].replace(Most_Used_Platform_lastPlat)
+
+## BOXPLOT ##
+cat = 'Most_Used_Platform'
+fig, ax = plt.subplots(ncols=len(num_cols_boxplot), figsize=(16, 1.*len(data_Most_Used_Platform[cat].unique())), sharey=True )
+
+for j, num in enumerate(num_cols_boxplot):
+    sns.boxplot(data=data_Most_Used_Platform, x=num, y=cat, ax=ax[j]);
+fig.suptitle(cat)
+fig.tight_layout()
+
+plt.figure(figsize=(5, 0.7))
+sns.heatmap(corr[[cat]].T[num_cols_boxplot], annot=True, cmap='coolwarm', fmt='.2f', vmax=1, vmin=-1)
+
+```
+
+
+
+
+    <Axes: >
+
 
 
 
@@ -515,7 +800,25 @@ However, this can be observed:
 
 *So, all this analysis raises a question: Is any social media platform more addictive than others, or are these differences between social networks the result of other factors such as generational differences, gender, or academic level?*
 
-## Conclusion
+### Conclusion
+
+
+```python
+distance_matrix = 1 - corr.abs()
+dist_vector = squareform(distance_matrix)
+linked = linkage(dist_vector, method='average')
+
+plt.figure(figsize=(10, 5))
+dendrogram(linked,
+            labels=corr.columns,
+            leaf_rotation=90,
+            leaf_font_size=12,
+            color_threshold=0.5,
+            above_threshold_color='gray')
+plt.title("Correlation Dendrogram (Spearman)", fontsize=14)
+plt.tight_layout()
+```
+
 
     
 ![png](Exploring%20Media%20Addiction%20in%20Students%20with%20EDA_files/Exploring%20Media%20Addiction%20in%20Students%20with%20EDA_50_0.png)
