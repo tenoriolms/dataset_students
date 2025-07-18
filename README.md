@@ -53,6 +53,7 @@ from scipy.spatial.distance import squareform
 
 
 ```python
+#from PC
 kaggle_dataset_path = kagglehub.dataset_download('adilshamim8/social-media-addiction-vs-relationships')
 
 print(f'Directory content:')
@@ -339,7 +340,7 @@ kuka.eda.plot_columns_dist(data_original, ncols=4, plotsize=(3.2,2));
 
 
     
-![png](Exploring%20Media%20Addiction%20in%20Students%20with%20EDO_files/Exploring%20Media%20Addiction%20in%20Students%20with%20EDO_12_0.png)
+![png](Exploring%20Media%20Addiction%20in%20Students%20with%20EDA_files/Exploring%20Media%20Addiction%20in%20Students%20with%20EDA_12_0.png)
     
 
 
@@ -397,14 +398,17 @@ inset_ax.set_title('Spearman correlation')
     Affects_Academic_Performance       object
     Relationship_Status       object
     columns =  ['Student_ID', 'Age', 'Avg_Daily_Usage_Hours', 'Sleep_Hours_Per_Night', 'Mental_Health_Score', 'Conflicts_Over_Social_Media', 'Addicted_Score']
-
-
-    
-![png](Exploring%20Media%20Addiction%20in%20Students%20with%20EDO_files/Exploring%20Media%20Addiction%20in%20Students%20with%20EDO_15_2.png)
     
 
 
-The Pearson coefficient indicates the linear correlation between two variables.
+
+
+    
+![png](Exploring%20Media%20Addiction%20in%20Students%20with%20EDA_files/Exploring%20Media%20Addiction%20in%20Students%20with%20EDA_15_2.png)
+    
+
+
+The Spearman coefficient indicates the monotonic correlation between two variables.
 
 In machine learning applications, highly correlated variables can sometimes interfere with each other and negatively impact model predictions.
 
@@ -457,8 +461,11 @@ plt.fill([6, 13, 13, 6], [6, 6, 13, 13],
          color='grey', alpha=0.7, edgecolor='black')
 ```
 
+
+
+
     
-![png](Exploring%20Media%20Addiction%20in%20Students%20with%20EDO_files/Exploring%20Media%20Addiction%20in%20Students%20with%20EDO_18_1.png)
+![png](Exploring%20Media%20Addiction%20in%20Students%20with%20EDA_files/Exploring%20Media%20Addiction%20in%20Students%20with%20EDA_18_1.png)
     
 
 
@@ -480,8 +487,12 @@ plt.figure(figsize=(10, 0.7))
 sns.heatmap(corr[['Addicted_Score']].T, annot=True, cmap='coolwarm', fmt='.2f')
 ```
 
+
+
+
+
     
-![png](Exploring%20Media%20Addiction%20in%20Students%20with%20EDO_files/Exploring%20Media%20Addiction%20in%20Students%20with%20EDO_21_1.png)
+![png](Exploring%20Media%20Addiction%20in%20Students%20with%20EDA_files/Exploring%20Media%20Addiction%20in%20Students%20with%20EDA_21_1.png)
     
 
 
@@ -523,7 +534,7 @@ plt.tight_layout()
 
 
     
-![png](Exploring%20Media%20Addiction%20in%20Students%20with%20EDO_files/Exploring%20Media%20Addiction%20in%20Students%20with%20EDO_25_0.png)
+![png](Exploring%20Media%20Addiction%20in%20Students%20with%20EDA_files/Exploring%20Media%20Addiction%20in%20Students%20with%20EDA_25_0.png)
     
 
 
@@ -569,13 +580,13 @@ plot('Gender')
 
 
     
-![png](Exploring%20Media%20Addiction%20in%20Students%20with%20EDO_files/Exploring%20Media%20Addiction%20in%20Students%20with%20EDO_32_0.png)
+![png](Exploring%20Media%20Addiction%20in%20Students%20with%20EDA_files/Exploring%20Media%20Addiction%20in%20Students%20with%20EDA_32_0.png)
     
 
 
 
     
-![png](Exploring%20Media%20Addiction%20in%20Students%20with%20EDO_files/Exploring%20Media%20Addiction%20in%20Students%20with%20EDO_32_1.png)
+![png](Exploring%20Media%20Addiction%20in%20Students%20with%20EDA_files/Exploring%20Media%20Addiction%20in%20Students%20with%20EDA_32_1.png)
     
 
 
@@ -603,13 +614,10 @@ fig.legend(loc='lower center', bbox_to_anchor=(0.5,-0.1), ncols=2)
 fig.tight_layout()
 ```
 
-    c:\Users\Lhucas Tenorio\AppData\Local\Programs\Python\Python311\Lib\site-packages\seaborn\distributions.py:1176: UserWarning: The following kwargs were not used by contour: 'level', 'pallete'
-      cset = contour_func(
-    
 
 
     
-![png](Exploring%20Media%20Addiction%20in%20Students%20with%20EDO_files/Exploring%20Media%20Addiction%20in%20Students%20with%20EDO_34_1.png)
+![png](Exploring%20Media%20Addiction%20in%20Students%20with%20EDA_files/Exploring%20Media%20Addiction%20in%20Students%20with%20EDA_34_1.png)
     
 
 
@@ -624,13 +632,13 @@ plot('Academic_Level')
 
 
     
-![png](Exploring%20Media%20Addiction%20in%20Students%20with%20EDO_files/Exploring%20Media%20Addiction%20in%20Students%20with%20EDO_37_0.png)
+![png](Exploring%20Media%20Addiction%20in%20Students%20with%20EDA_files/Exploring%20Media%20Addiction%20in%20Students%20with%20EDA_37_0.png)
     
 
 
 
     
-![png](Exploring%20Media%20Addiction%20in%20Students%20with%20EDO_files/Exploring%20Media%20Addiction%20in%20Students%20with%20EDO_37_1.png)
+![png](Exploring%20Media%20Addiction%20in%20Students%20with%20EDA_files/Exploring%20Media%20Addiction%20in%20Students%20with%20EDA_37_1.png)
     
 
 
@@ -653,13 +661,13 @@ plot('Affects_Academic_Performance')
 
 
     
-![png](Exploring%20Media%20Addiction%20in%20Students%20with%20EDO_files/Exploring%20Media%20Addiction%20in%20Students%20with%20EDO_40_0.png)
+![png](Exploring%20Media%20Addiction%20in%20Students%20with%20EDA_files/Exploring%20Media%20Addiction%20in%20Students%20with%20EDA_40_0.png)
     
 
 
 
     
-![png](Exploring%20Media%20Addiction%20in%20Students%20with%20EDO_files/Exploring%20Media%20Addiction%20in%20Students%20with%20EDO_40_1.png)
+![png](Exploring%20Media%20Addiction%20in%20Students%20with%20EDA_files/Exploring%20Media%20Addiction%20in%20Students%20with%20EDA_40_1.png)
     
 
 
@@ -686,13 +694,13 @@ plot('Relationship_Status')
 
 
     
-![png](Exploring%20Media%20Addiction%20in%20Students%20with%20EDO_files/Exploring%20Media%20Addiction%20in%20Students%20with%20EDO_43_0.png)
+![png](Exploring%20Media%20Addiction%20in%20Students%20with%20EDA_files/Exploring%20Media%20Addiction%20in%20Students%20with%20EDA_43_0.png)
     
 
 
 
     
-![png](Exploring%20Media%20Addiction%20in%20Students%20with%20EDO_files/Exploring%20Media%20Addiction%20in%20Students%20with%20EDO_43_1.png)
+![png](Exploring%20Media%20Addiction%20in%20Students%20with%20EDA_files/Exploring%20Media%20Addiction%20in%20Students%20with%20EDA_43_1.png)
     
 
 
@@ -724,14 +732,18 @@ sns.heatmap(corr[[cat]].T[num_cols_boxplot], annot=True, cmap='coolwarm', fmt='.
 
 ```
 
+
+
+
+
     
-![png](Exploring%20Media%20Addiction%20in%20Students%20with%20EDO_files/Exploring%20Media%20Addiction%20in%20Students%20with%20EDO_46_1.png)
+![png](Exploring%20Media%20Addiction%20in%20Students%20with%20EDA_files/Exploring%20Media%20Addiction%20in%20Students%20with%20EDA_46_1.png)
     
 
 
 
     
-![png](Exploring%20Media%20Addiction%20in%20Students%20with%20EDO_files/Exploring%20Media%20Addiction%20in%20Students%20with%20EDO_46_2.png)
+![png](Exploring%20Media%20Addiction%20in%20Students%20with%20EDA_files/Exploring%20Media%20Addiction%20in%20Students%20with%20EDA_46_2.png)
     
 
 
@@ -796,7 +808,7 @@ plt.tight_layout()
 
 
     
-![png](Exploring%20Media%20Addiction%20in%20Students%20with%20EDO_files/Exploring%20Media%20Addiction%20in%20Students%20with%20EDO_50_0.png)
+![png](Exploring%20Media%20Addiction%20in%20Students%20with%20EDA_files/Exploring%20Media%20Addiction%20in%20Students%20with%20EDA_50_0.png)
     
 
 
